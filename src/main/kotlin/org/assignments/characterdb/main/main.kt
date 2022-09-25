@@ -1,31 +1,33 @@
 package org.assignments.characterdb.main
 
+import mu.KotlinLogging
+import org.assignments.characterdb.models.CharacterMemStore
 import org.assignments.characterdb.models.CharacterModel
+import org.assignments.characterdb.views.CharacterView
 
-var character = CharacterModel() //base character model with no data
-var characters =  ArrayList<CharacterModel>() //array list of all characters
+private val logger = KotlinLogging.logger {}
 
-fun main()
-{
-    println("Welcome to the Character Database App v1.0")
+var characters = CharacterMemStore()
+val characterView = CharacterView()
 
-    var input: Int = -1
+fun main() {
+    logger.info { "Launching Character Database App" }
+    println("Character Database App v1.0")
 
-    do
-    {
-        input = menu()
-        when(input)
-        {
+    var input: Int
+
+    do {
+        input = characterView.menu()
+        when (input) {
             1 -> addCharacter()
             2 -> updateCharacter()
-            3 -> getCharacterList()
-            4 -> deleteCharacter()
-            0 -> println("Bye Bye o7")
-            else -> println("Invalid Option Selected")
+            3 -> characterView.listCharacters(characters)
+            4 -> searchCharacter()
+            0 -> println("Exiting App")
         }
     }
-    while(input != 0)
 }
+
 
 fun menu() : Int
 {
@@ -47,36 +49,21 @@ fun menu() : Int
 
 fun addCharacter()
 {
-    println("------------------")
-    println("Add Character")
-    println("------------------")
+    val aCharacter = CharacterModel()
 
-    println("Enter Character Name: ")
-    character.name = readLine()!!
-
-    println("Enter Character Description: ")
-    character.description = readLine()!!
-
-    println("Enter Character Occupation: ")
-    character.occupations = readLine()!!
-
-    println("Enter Characters First Appearance: ")
-    character.originalAppearance = readLine()!!
-
-    println("Enter Characters First Appearance Year: ")
-    character.originalAppearanceYear = readLine()!!.toInt()
-
-    //check if we can add the character with this data
-    if(allMandatoryFieldsFilled(character))
+    if(characterView.addCharacterData((aCharacter)))
     {
-        characters.add(character)
+        characters.create(aCharacter)
     }
     else
     {
-        //couldn't add character, throw error to user.
+        logger.info("Character Not Added")
     }
 }
+fun searchCharacter()
+{
 
+}
 fun allMandatoryFieldsFilled(character: CharacterModel): Boolean
 {
     return true
@@ -87,12 +74,14 @@ fun updateCharacter()
 
 }
 
-fun getCharacterList()
+fun getCharacters()
 {
-    for (c in characters)
-    {
-        println(c)
-    }
+
+}
+
+fun charSelectionList(): Long
+{
+
 }
 
 fun deleteCharacter()
