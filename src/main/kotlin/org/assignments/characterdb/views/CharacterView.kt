@@ -1,5 +1,6 @@
 package org.assignments.characterdb.views
 
+import org.assignments.characterdb.models.CharacterJSONStore
 import org.assignments.characterdb.models.CharacterMemStore
 import org.assignments.characterdb.models.CharacterModel
 
@@ -13,6 +14,7 @@ class CharacterView {
         println("2: Update a Character")
         println("3: List a Character")
         println("4: Search a Character")
+        println("5: Delete a Character")
         println("0: Exit")
         println("> ")
 
@@ -30,7 +32,7 @@ class CharacterView {
         return option
     }
 
-    fun listCharacters(characters: CharacterMemStore)
+    fun listCharacters(characters: CharacterJSONStore)
     {
         println()
         characters.logAll()

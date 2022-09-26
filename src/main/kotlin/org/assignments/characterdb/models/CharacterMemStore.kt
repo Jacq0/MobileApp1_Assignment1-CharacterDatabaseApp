@@ -47,4 +47,8 @@ class CharacterMemStore: CharacterStore {
     internal fun logAll(){
         characters.forEach { logger.info("${it}") }
     }
+
+    override fun delete(character: CharacterModel) {
+        characters.remove(character)
+    }
 }

@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1762964103924762672,
+    "name": "Arthur Dent",
+    "description": "A normal man in a less than normal universe.",
+    "occupations": "Sandwich Maker",
+    "originalAppearance": "The Hitchhikers Guide to the Galaxy",
+    "originalAppearanceYear": 1978
+  },
+  {
+    "id": 2733829463895221858,
+    "name": "Terminator Model 101",
+    "description": "Killer robot that looks an awful lot like Arnold Schwarznegger.",
+    "occupations": "Killer Robot",
+    "originalAppearance": "Terminator",
+    "originalAppearanceYear": 1984
+  },
+  {
+    "id": 7848415238493551748,
+    "name": "Clank",
+    "description": "Witty robotic sidekick that also functions as a useful backpack.",
+    "occupations": "Sidekick",
+    "originalAppearance": "Ratchet \u0026 Clank",
+    "originalAppearanceYear": 2002
+  },
+  {
+    "id": 988289764898218375,
+    "name": "Misato Katsuragi",
+    "description": "Dishes out orders from the HQ.",
+    "occupations": "NERV Command",
+    "originalAppearance": "Neon Genesis Evangelion",
+    "originalAppearanceYear": 1995
+  },
+  {
+    "id": -3227814399311831312,
+    "name": "Son Goku",
+    "description": "The question still stands... Can he be beaten?",
+    "occupations": "Martial Artist",
+    "originalAppearance": "Dragon Ball",
+    "originalAppearanceYear": 1984
+  },
+  {
+    "id": -729065295400670082,
+    "name": "Doctor Octopus",
+    "description": "Mad scientist with 4 extra mechanical arms.",
+    "occupations": "Mad Scientist",
+    "originalAppearance": "The Amazing Spider Man #3",
+    "originalAppearanceYear": 1963
+  },
+  {
+    "id": 6517508319540616931,
+    "name": "Solid Snake",
+    "description": "A smart and very sneaky elite operative.",
+    "occupations": "Special Forces Operative",
+    "originalAppearance": "Metal Gear",
+    "originalAppearanceYear": 1987
+  },
+  {
+    "id": 1985129111428279135,
+    "name": "Alice",
+    "description": "Prone to falling down rabbitholes.",
+    "occupations": "Child",
+    "originalAppearance": "Alice\u0027s Adventures in Wonderland",
+    "originalAppearanceYear": 1865
+  },
+  {
+    "id": 6104765967129399760,
+    "name": "Spike Spiegel",
+    "description": "A broke bounty hunter who is just trying to make ends meet.",
+    "occupations": "Bounty Hunter",
+    "originalAppearance": "Cowboy Bebop",
+    "originalAppearanceYear": 1998
+  },
+  {
+    "id": -2876880221282325757,
+    "name": "Pintman",
+    "description": "45 pints, and I\u0027ll be at it again.",
+    "occupations": "Pintman",
+    "originalAppearance": "The Pub",
+    "originalAppearanceYear": 1960
+  }
+]
