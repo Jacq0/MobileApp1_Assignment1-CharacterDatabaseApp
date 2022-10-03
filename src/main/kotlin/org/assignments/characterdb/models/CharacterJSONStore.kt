@@ -35,7 +35,24 @@ class CharacterJSONStore : CharacterStore
 
     override fun getOne(id: Long) : CharacterModel? {
         var foundChar: CharacterModel? = characters.find { c -> c.id == id }
+
         return foundChar
+    }
+
+    //there's probably a better wya to do this using lambdas, returns characters by substring name
+    override fun getByName(n: String): MutableList<CharacterModel>?
+    {
+        val chars = mutableListOf<CharacterModel>()
+
+        for(c in characters)
+        {
+            if(c.name.contains(n, true))
+            {
+                chars.add(c)
+            }
+        }
+
+        return chars
     }
 
     override fun create(character: CharacterModel) {

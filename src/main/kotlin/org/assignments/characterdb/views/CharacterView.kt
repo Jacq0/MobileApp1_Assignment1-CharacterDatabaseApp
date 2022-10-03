@@ -12,9 +12,10 @@ class CharacterView {
 
         println("1: Add a Character")
         println("2: Update a Character")
-        println("3: List a Character")
-        println("4: Search a Character")
-        println("5: Delete a Character")
+        println("3: List Characters")
+        println("4: Search a Character by ID")
+        println("5: Search a Character by Name")
+        println("6: Delete a Character")
         println("0: Exit")
         println("> ")
 
@@ -48,6 +49,21 @@ class CharacterView {
         else
         {
             println("Character not Found...")
+        }
+    }
+
+    fun showCharacters(chars: List<CharacterModel>)
+    {
+        if(chars != null && !chars.isEmpty())
+        {
+            for(c in chars)
+            {
+                println("Character Details [ $c ]")
+            }
+        }
+        else
+        {
+            println("No Characters with this Name...")
         }
     }
 
@@ -124,5 +140,15 @@ class CharacterView {
             -1
         }
         return searchId
+    }
+
+    fun getName(): String
+    {
+        var name: String?
+
+        print("Enter Name to Search/Update: ")
+        name = readLine()!!
+
+        return name
     }
 }

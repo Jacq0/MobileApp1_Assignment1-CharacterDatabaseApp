@@ -30,8 +30,9 @@ class CharacterController {
                 2 -> update()
                 3 -> list()
                 4 -> search()
-                5 -> delete()
-                6 -> addDummyData()
+                5 -> searchByName()
+                6 -> delete()
+                7 -> addDummyData()
                 0 -> println("Exiting App")
                 else -> println("Invalid Option: " + input.toString())
             }
@@ -91,13 +92,41 @@ class CharacterController {
 
     fun search() {
         val aCharacter = search(charView.getId())!!
-        charView.showCharacter(aCharacter)
+
+        if(aCharacter != null)
+        {
+            charView.showCharacter(aCharacter)
+        }
+        else
+        {
+            println("No character found with this ID")
+        }
     }
 
 
     fun search(id: Long) : CharacterModel? {
         val foundChar = characters.getOne(id)
         return foundChar
+    }
+
+    fun searchByName()
+    {
+        val chars = searchByName(charView.getName())!!
+
+        if(chars != null && !chars.isEmpty())
+        {
+            charView.showCharacters(chars)
+        }
+        else
+        {
+            println("No Character found with this Name")
+        }
+    }
+
+    fun searchByName(name: String): List<CharacterModel>?
+    {
+        val foundChars = characters.getByName(name)
+        return foundChars
     }
 
     fun addDummyData() {

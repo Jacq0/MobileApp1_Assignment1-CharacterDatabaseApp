@@ -24,6 +24,10 @@ class CharacterMemStore: CharacterStore {
         return foundCharacter
     }
 
+    override fun getByName(name: String): List<CharacterModel>? {
+        TODO("Not yet implemented")
+    }
+
     override fun create(character: CharacterModel)
     {
         character.id = getId()
