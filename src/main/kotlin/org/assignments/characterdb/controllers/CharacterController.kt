@@ -1,6 +1,7 @@
 package org.assignments.characterdb.controllers
 
 import mu.KotlinLogging
+import org.assignments.characterdb.models.CharacterDBStore
 import org.assignments.characterdb.models.CharacterJSONStore
 import org.assignments.characterdb.models.CharacterModel
 //import org.assignments.characterdb.models.CharacterMemStore
@@ -12,7 +13,7 @@ import java.time.format.DateTimeFormatter
 class CharacterController {
 
     //val characters = CharacterMemStore()
-    val characters = CharacterJSONStore()
+    val characters = CharacterDBStore()
     val charView = CharacterView()
     val logger = KotlinLogging.logger {}
 
@@ -32,10 +33,10 @@ class CharacterController {
                 1 -> add()
                 2 -> update()
                 3 -> list()
-                4 -> search()
+                //4 -> search()
                 5 -> searchByName()
                 6 -> delete()
-                7 -> addDummyData()
+                //7 -> addDummyData()
                 0 -> println("Exiting App")
                 else -> println("Invalid Option: " + input.toString())
             }

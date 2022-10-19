@@ -1,5 +1,6 @@
 package org.assignments.characterdb.views
 
+import org.assignments.characterdb.models.CharacterDBStore
 import org.assignments.characterdb.models.CharacterJSONStore
 import org.assignments.characterdb.models.CharacterMemStore
 import org.assignments.characterdb.models.CharacterModel
@@ -33,7 +34,7 @@ class CharacterView {
         return option
     }
 
-    fun listCharacters(characters: CharacterJSONStore)
+    fun listCharacters(characters: CharacterDBStore)
     {
         println()
         characters.logAll()

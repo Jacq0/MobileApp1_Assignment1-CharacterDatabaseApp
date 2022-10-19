@@ -1,21 +1,12 @@
 package org.assignments.characterdb.models
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
+import io.ktor.server.util.*
+import io.ktor.util.*
 import mu.KotlinLogging
-
-import org.assignments.characterdb.helpers.*
-import java.util.*
 import java.sql.*
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.Date
+import java.time.LocalDateTime
+import java.util.*
 
 val dbUser = "root"
 val dbPassword = ""
@@ -30,6 +21,7 @@ private val logger = KotlinLogging.logger {}
 //These have to be null by default before initialised
 var conn : Connection? = null
 
+@OptIn(InternalAPI::class)
 class CharacterDBStore: CharacterStore
 {
     var characters = mutableListOf<CharacterModel>()
@@ -58,8 +50,8 @@ class CharacterDBStore: CharacterStore
                 dbChar.occupations=results.getString("OCCUPATION")
                 dbChar.originalAppearance=results.getString("ORIGINAL_APPEARANCE")
                 dbChar.originalAppearanceYear=results.getInt("APPEARANCE_YEAR")
-                dbChar.dateTimeAdded=convertToDateTime(results.getDate("ADDED"))
-                dbChar.lastModified=convertToDateTime(results.getDate("LAST_MODIFIED"))
+                dbChar.dateTimeAdded=convertToDateTime(results.getDate("ADDED"))!! //this will never be a null value unless something dire happens
+                dbChar.lastModified=convertToDateTime(results.getDate("LAST_MODIFIED")) //this might be null if we haven't updated it yet.
 
                 characters.add(dbChar);
             }
@@ -106,10 +98,11 @@ class CharacterDBStore: CharacterStore
         {
             var statement= conn!!.createStatement();
 
+            //we don't need to add the last modified value here because its not applicable to an add. (If its null the character entry was never modified)
             var result = statement.executeUpdate("INSERT INTO " + dbCharacterTable + " " +
-                    "(ID, NAME, DESCRIPTION, OCCUPATION, ORIGINAL_APPEARANCE, APPEARANCE_YEAR, ADDED, LAST_MODIFIED) VALUES " +
-                    "(" + character.id + ", " + character.name + ", " + character.description + ", " + character.occupations + ", " +
-                    character.originalAppearance + ", " + character.originalAppearanceYear + ", " + character.dateTimeAdded + ", " + character.lastModified + ")")
+                    "(ID, NAME, DESCRIPTION, OCCUPATION, ORIGINAL_APPEARANCE, APPEARANCE_YEAR, ADDED) VALUES " +
+                    "(\'" + character.id + "\', \'" + character.name + "\',\'" + character.description + "\', \'" + character.occupations + "\', \'" +
+                    character.originalAppearance + "\', \'" + character.originalAppearanceYear + "\', \'" + character.dateTimeAdded + "\')")
 
             characters.add(character) //add to character list last
         }
@@ -117,17 +110,37 @@ class CharacterDBStore: CharacterStore
         {
             logger.error { ex.toString() }
         }
-
     }
 
     override fun update(character: CharacterModel)
     {
-        TODO("Not yet implemented")
+        var foundChar = getOne(character.id!!)
+        if (foundChar != null)
+        {
+            foundChar.name = character.name
+            foundChar.description = character.description
+            foundChar.occupations = character.occupations
+            foundChar.originalAppearance = character.originalAppearance
+            foundChar.originalAppearanceYear = character.originalAppearanceYear
+            foundChar.lastModified = Date(System.currentTimeMillis()).toLocalDateTime();
+        }
     }
 
     override fun delete(character: CharacterModel)
     {
-        TODO("Not yet implemented")
+        try
+        {
+            var statement= conn!!.createStatement();
+
+            //we don't need to add the last modified value here because its not applicable to an add. (If its null the character entry was never modified)
+            var result = statement.executeUpdate("DELETE FROM " + dbCharacterTable + " WHERE ID = " + "\'" + character.id + "\'");
+
+            characters.remove(character)
+        }
+        catch(ex: SQLException)
+        {
+            logger.error { ex.toString() }
+        }
     }
 
     internal fun logAll()
@@ -145,8 +158,17 @@ class CharacterDBStore: CharacterStore
         return DriverManager.getConnection("jdbc:mysql://" + dbUri + ":" + dbPort + "/" + dbName, properties)
     }
 
-    private fun convertToDateTime(inDate: Date): LocalDateTime
+    @OptIn(InternalAPI::class)
+    private fun convertToDateTime(inDate: Date?): LocalDateTime?
     {
-        return inDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        if(inDate != null)
+        {
+            val date = Date(System.currentTimeMillis())
+
+            val localDateTime: LocalDateTime = date.toLocalDateTime();
+
+            return localDateTime
+        }
+        return null;
     }
 }
