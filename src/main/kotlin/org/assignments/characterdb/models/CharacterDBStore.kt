@@ -117,12 +117,33 @@ class CharacterDBStore: CharacterStore
         var foundChar = getOne(character.id!!)
         if (foundChar != null)
         {
-            foundChar.name = character.name
-            foundChar.description = character.description
-            foundChar.occupations = character.occupations
-            foundChar.originalAppearance = character.originalAppearance
-            foundChar.originalAppearanceYear = character.originalAppearanceYear
-            foundChar.lastModified = Date(System.currentTimeMillis()).toLocalDateTime();
+            logger.debug { character }
+            logger.debug { foundChar }
+            try
+            {
+                foundChar.name = character.name
+                foundChar.description = character.description
+                foundChar.occupations = character.occupations
+                foundChar.originalAppearance = character.originalAppearance
+                foundChar.originalAppearanceYear = character.originalAppearanceYear
+                foundChar.lastModified = Date(System.currentTimeMillis()).toLocalDateTime();
+
+                var statement= conn!!.createStatement();
+
+                var result = statement.executeUpdate("UPDATE " + dbCharacterTable + " SET NAME = \'" + foundChar?.name
+                        + "\', DESCRIPTION = \'" + foundChar?.description + "\'," + "OCCUPATION = \'" + foundChar?.occupations + "\',"
+                        + "ORIGINAl_APPEARANCE = \'" + foundChar?.originalAppearance + "\'," + "APPEARANCE_YEAR = \'"
+                        + foundChar?.originalAppearanceYear + "\'," + "LAST_MODIFIED = \'" + foundChar?.lastModified + "\' WHERE ID = \'" + foundChar?.id + "\'")
+            }
+            catch(ex: SQLException)
+            {
+                logger.error { ex.toString() }
+            }
+        }
+        else
+        {
+            //no char found.
+            logger.error{ "Character not found" }
         }
     }
 

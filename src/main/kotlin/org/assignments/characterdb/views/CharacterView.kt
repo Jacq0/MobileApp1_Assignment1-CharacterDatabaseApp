@@ -86,13 +86,13 @@ class CharacterView {
         print("Enter Original Appearance Year: ")
         character.originalAppearanceYear = readLine()!!.toInt()
 
-        return character.name.isNotEmpty() //validate our input
+        return character.name.isNotEmpty() //validate our input, add more secure checks
     }
 
     fun updateCharacterData(character: CharacterModel): Boolean
     {
         val tempName: String?
-        val tempDescrption: String?
+        val tempDescription: String?
         val tempOccupations: String?
         val tempOriginalAppearance: String?
         val tempOriginalAppearanceYear: Int?
@@ -104,7 +104,7 @@ class CharacterView {
             tempName = readLine()!!
 
             print("Enter a new Description for [" + character.description + "]: ")
-            tempDescrption = readLine()!!
+            tempDescription = readLine()!!
 
             print("Enter a new Occupation for [" + character.occupations + "]: ")
             tempOccupations = readLine()!!
@@ -116,8 +116,15 @@ class CharacterView {
             tempOriginalAppearanceYear = readLine()!!.toInt()
 
 
-            if(!tempName.isNullOrEmpty())
+            if(!tempName.isNullOrEmpty()) //authenticate valid variables here, could write new method for it.
             {
+                //update values and return true
+                character.name = tempName;
+                character.description = tempDescription;
+                character.occupations = tempOccupations;
+                character.originalAppearance = tempOriginalAppearance;
+                character.originalAppearanceYear = tempOriginalAppearanceYear;
+
                 return true
             }
         }

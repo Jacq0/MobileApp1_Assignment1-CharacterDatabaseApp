@@ -33,10 +33,10 @@ class CharacterController {
                 1 -> add()
                 2 -> update()
                 3 -> list()
-                //4 -> search()
+                4 -> search()
                 5 -> searchByName()
                 6 -> delete()
-                //7 -> addDummyData()
+                7 -> addDummyData()
                 0 -> println("Exiting App")
                 else -> println("Invalid Option: " + input.toString())
             }
