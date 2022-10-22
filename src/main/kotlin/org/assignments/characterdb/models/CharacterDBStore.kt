@@ -74,6 +74,11 @@ class CharacterDBStore: CharacterStore
         return foundChar
     }
 
+    override fun getAllAlphabeticallyByName(): List<CharacterModel>
+    {
+       return characters.sortedBy { it.name }
+    }
+
     override fun getByName(n: String): MutableList<CharacterModel>?
     {
         val chars = mutableListOf<CharacterModel>()

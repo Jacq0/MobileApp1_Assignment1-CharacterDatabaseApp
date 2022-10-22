@@ -28,15 +28,13 @@ class CharacterController {
 
         do
         {
-            input = menu()
+            input = mainMenuReturn()
             when (input) {
                 1 -> add()
                 2 -> update()
-                3 -> list()
-                4 -> search()
-                5 -> searchByName()
-                6 -> delete()
-                7 -> addDummyData()
+                3 -> delete()
+                4 -> listMenu()
+                5 -> searchMenu()
                 0 -> println("Exiting App")
                 else -> println("Invalid Option: " + input.toString())
             }
@@ -46,9 +44,64 @@ class CharacterController {
         logger.info{"Exiting Character Database App"}
     }
 
-    fun menu() :Int { return charView.menu() }
+    fun mainMenuReturn() : Int
+    {
+        return charView.menu()
+    }
 
-    fun add(){
+    fun searchMenu()
+    {
+        var input: Int
+
+        do
+        {
+            input = searchMenuReturn()
+            when (input) {
+                1 -> searchByName()
+                2 -> search()
+                0 -> exitSearch()
+                else -> println("Invalid Option: " + input.toString())
+            }
+        }
+        while (input != 0)
+    }
+
+    fun searchMenuReturn(): Int
+    {
+        return charView.searchMenu()
+    }
+
+    fun listMenu()
+    {
+        var input: Int
+
+        do
+        {
+            input = listMenuReturn()
+            when (input) {
+                1 -> listAlphabetically()
+                2 -> println("Listed")
+                3 -> println("Listed")
+                4 -> println("Listed")
+                0 -> exitSearch()
+                else -> println("Invalid Option: " + input.toString())
+            }
+        }
+        while (input != 0)
+    }
+
+    fun listMenuReturn() : Int
+    {
+        return charView.listMenu()
+    }
+
+    fun exitSearch()
+    {
+
+    }
+
+    fun add()
+    {
         val aCharacter = CharacterModel()
 
         if (charView.addCharacterData(aCharacter))
@@ -57,11 +110,18 @@ class CharacterController {
             logger.info("Character Not Added")
     }
 
-    fun list() {
+    fun list()
+    {
         charView.listCharacters(characters)
     }
 
-    fun update() {
+    fun listAlphabetically()
+    {
+        charView.listCharactersAlphabetically(characters)
+    }
+
+    fun update()
+    {
 
         charView.listCharacters(characters)
         val searchId = charView.getId()
@@ -80,7 +140,8 @@ class CharacterController {
             println("Character Not Updated...")
     }
 
-    fun delete() {
+    fun delete()
+    {
         charView.listCharacters(characters)
         var searchId = charView.getId()
         val aCharacter = search(searchId)
@@ -94,7 +155,8 @@ class CharacterController {
             println("Placemark Not Deleted...")
     }
 
-    fun search() {
+    fun search()
+    {
         val aCharacter = search(charView.getId())!!
 
         if(aCharacter != null)
@@ -108,7 +170,8 @@ class CharacterController {
     }
 
 
-    fun search(id: Long) : CharacterModel? {
+    fun search(id: Long) : CharacterModel?
+    {
         val foundChar = characters.getOne(id)
         return foundChar
     }
@@ -117,7 +180,7 @@ class CharacterController {
     {
         val chars = searchByName(charView.getName())!!
 
-        if(chars != null && !chars.isEmpty())
+        if (chars != null && !chars.isEmpty())
         {
             charView.showCharacters(chars)
         }

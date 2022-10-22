@@ -7,18 +7,74 @@ import org.assignments.characterdb.models.CharacterModel
 
 class CharacterView {
 
-    fun menu(): Int {
+    fun menu(): Int
+    {
         var option: Int
         var input: String?
 
+        println("------------------------------------")
+        println("Main Menu")
         println("1: Add a Character")
         println("2: Update a Character")
-        println("3: List Characters")
-        println("4: Search a Character by ID")
-        println("5: Search a Character by Name")
-        println("6: Delete a Character")
+        println("3: Delete a Character")
+        println("4: List Characters")
+        println("5: Search Characters")
         println("0: Exit")
-        println("> ")
+        print("> ")
+
+        input = readLine()!!
+
+        option = if(input.toIntOrNull() != null && !input.isEmpty())
+        {
+            input.toInt()
+        }
+        else
+        {
+            -1
+        }
+
+        return option
+    }
+
+    fun searchMenu() : Int
+    {
+        var option: Int
+        var input: String?
+
+        println("------------------------------------")
+        println("Search Menu")
+        println("1: Search by Name")
+        println("2: Search by ID")
+        println("0: Exit Search Menu")
+        print("> ")
+
+        input = readLine()!!
+
+        option = if(input.toIntOrNull() != null && !input.isEmpty())
+        {
+            input.toInt()
+        }
+        else
+        {
+            -1
+        }
+
+        return option
+    }
+
+    fun listMenu() : Int
+    {
+        var option: Int
+        var input: String?
+
+        println("------------------------------------")
+        println("List Menu")
+        println("1: List Alphabetically")
+        println("2: List by Year of Appearance")
+        println("3: List by Date Added")
+        println("4: List last Modified")
+        println("0: Exit List Menu")
+        print("> ")
 
         input = readLine()!!
 
@@ -38,6 +94,13 @@ class CharacterView {
     {
         println()
         characters.logAll()
+        println()
+    }
+
+    fun listCharactersAlphabetically(characters: CharacterDBStore)
+    {
+        println()
+        characters.getAllAlphabeticallyByName()
         println()
     }
 

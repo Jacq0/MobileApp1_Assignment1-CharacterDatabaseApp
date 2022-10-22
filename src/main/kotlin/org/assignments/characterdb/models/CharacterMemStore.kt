@@ -27,6 +27,9 @@ class CharacterMemStore: CharacterStore {
     override fun getByName(name: String): List<CharacterModel>? {
         TODO("Not yet implemented")
     }
+    override fun getAllAlphabeticallyByName(): List<CharacterModel> {
+        TODO("Not yet implemented")
+    }
 
     override fun create(character: CharacterModel)
     {

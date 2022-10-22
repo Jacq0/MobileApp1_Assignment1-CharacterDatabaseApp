@@ -61,6 +61,10 @@ class CharacterJSONStore : CharacterStore
         serialize()
     }
 
+    override fun getAllAlphabeticallyByName(): List<CharacterModel> {
+        TODO("Not yet implemented")
+    }
+
     override fun update(character: CharacterModel) {
         var foundChar = getOne(character.id!!)
         if (foundChar != null) {
