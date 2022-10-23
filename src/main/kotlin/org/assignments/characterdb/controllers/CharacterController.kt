@@ -2,18 +2,13 @@ package org.assignments.characterdb.controllers
 
 import mu.KotlinLogging
 import org.assignments.characterdb.models.CharacterDBStore
-import org.assignments.characterdb.models.CharacterJSONStore
 import org.assignments.characterdb.models.CharacterModel
-//import org.assignments.characterdb.models.CharacterMemStore
 import org.assignments.characterdb.views.CharacterView
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.sql.SQLException
 
-class CharacterController {
-
-    //val characters = CharacterMemStore()
-    val characters = CharacterDBStore()
+class CharacterController
+{
+    val charDB = CharacterDBStore()
     val charView = CharacterView()
     val logger = KotlinLogging.logger {}
 
@@ -35,8 +30,9 @@ class CharacterController {
                 3 -> delete()
                 4 -> listMenu()
                 5 -> searchMenu()
+                6 -> databaseMenu()
                 0 -> println("Exiting App")
-                else -> println("Invalid Option: " + input.toString())
+                else -> println("Invalid Option")
             }
         }
         while (input != 0)
@@ -56,11 +52,12 @@ class CharacterController {
         do
         {
             input = searchMenuReturn()
-            when (input) {
+            when (input)
+            {
                 1 -> searchByName()
                 2 -> search()
                 0 -> exitSearch()
-                else -> println("Invalid Option: " + input.toString())
+                else -> println("Invalid Option")
             }
         }
         while (input != 0)
@@ -78,13 +75,14 @@ class CharacterController {
         do
         {
             input = listMenuReturn()
-            when (input) {
+            when (input)
+            {
                 1 -> listAlphabetically()
-                2 -> println("Listed")
+                2 -> listByYear()
                 3 -> println("Listed")
                 4 -> println("Listed")
                 0 -> exitSearch()
-                else -> println("Invalid Option: " + input.toString())
+                else -> println("Invalid Option")
             }
         }
         while (input != 0)
@@ -93,6 +91,31 @@ class CharacterController {
     fun listMenuReturn() : Int
     {
         return charView.listMenu()
+    }
+
+    fun databaseMenu()
+    {
+        var input: Int
+
+        do
+        {
+            input = databaseMenuReturn()
+            when (input)
+            {
+                1 -> exportCharsToJSON()
+                2 -> importCharsFromJSON()
+                3 -> wipeDatabase()
+                4 -> wipeJSON()
+                0 -> exitSearch()
+                else -> println("Invalid Option")
+            }
+        }
+        while (input != 0)
+    }
+
+    fun databaseMenuReturn(): Int
+    {
+        return charView.databaseMenu()
     }
 
     fun exitSearch()
@@ -105,51 +128,65 @@ class CharacterController {
         val aCharacter = CharacterModel()
 
         if (charView.addCharacterData(aCharacter))
-            characters.create(aCharacter)
+        {
+            charDB.create(aCharacter)
+        }
         else
-            logger.info("Character Not Added")
+        {
+            logger.info("Character Not Added - Potential Input Error")
+        }
     }
 
     fun list()
     {
-        charView.listCharacters(characters)
+        charView.listCharacters(charDB)
     }
 
     fun listAlphabetically()
     {
-        charView.listCharactersAlphabetically(characters)
+        charView.listCharactersAlphabetically(charDB)
+    }
+
+    fun listByYear()
+    {
+        charView.listCharactersByYear(charDB)
     }
 
     fun update()
     {
-
-        charView.listCharacters(characters)
+        charView.listCharacters(charDB)
         val searchId = charView.getId()
         val aCharacter = search(searchId)
 
-        if(aCharacter != null) {
-            if(charView.updateCharacterData(aCharacter)) {
-                characters.update(aCharacter)
+        if(aCharacter != null)
+        {
+            if(charView.updateCharacterData(aCharacter))
+            {
+                charDB.update(aCharacter)
                 charView.showCharacter(aCharacter)
-                logger.info("Character Updated : [ $aCharacter ]")
+                logger.info("Character Updated : \n" + charDB.toStringVerbose(aCharacter))
             }
             else
-                logger.info("Character Not Updated")
+            {
+                logger.info("Character Not Updated - Potential Input Error")
+            }
         }
         else
-            println("Character Not Updated...")
+        {
+            logger.info("A Character was not Found...")
+        }
     }
 
     fun delete()
     {
-        charView.listCharacters(characters)
+        charView.listCharacters(charDB)
         var searchId = charView.getId()
         val aCharacter = search(searchId)
 
         if(aCharacter != null) {
-            characters.delete(aCharacter)
+            charDB.delete(aCharacter)
             println("Character Deleted...")
-            charView.listCharacters(characters)
+            charView.listCharacters(charDB)
         }
         else
             println("Placemark Not Deleted...")
@@ -172,7 +209,7 @@ class CharacterController {
 
     fun search(id: Long) : CharacterModel?
     {
-        val foundChar = characters.getOne(id)
+        val foundChar = charDB.getOne(id)
         return foundChar
     }
 
@@ -192,21 +229,70 @@ class CharacterController {
 
     fun searchByName(name: String): List<CharacterModel>?
     {
-        val foundChars = characters.getByName(name)
+        val foundChars = charDB.getByName(name)
         return foundChars
     }
 
-    fun addDummyData() {
-        characters.create(CharacterModel(name = "Superman", description = "Kryptonian who possesses incredible powers.", occupations = "Superhero", originalAppearance = "Action Comics #1", originalAppearanceYear = 1938))
-        characters.create(CharacterModel(name = "Arthur Dent", description = "A normal man in a less than normal universe.", occupations = "Sandwich Maker", originalAppearance = "The Hitchhikers Guide to the Galaxy", originalAppearanceYear = 1978))
-        characters.create(CharacterModel(name = "Terminator Model 101", description = "Killer robot that looks an awful lot like Arnold Schwarznegger.", occupations = "Killer Robot", originalAppearance = "Terminator", originalAppearanceYear = 1984))
-        characters.create(CharacterModel(name = "Clank", description = "Witty robotic sidekick that also functions as a useful backpack.", occupations = "Sidekick", originalAppearance = "Ratchet & Clank", originalAppearanceYear = 2002))
-        characters.create(CharacterModel(name = "Misato Katsuragi", description = "Dishes out orders from the HQ.", occupations = "NERV Command", originalAppearance = "Neon Genesis Evangelion", originalAppearanceYear = 1995))
-        characters.create(CharacterModel(name = "Son Goku", description = "The question still stands... Can he be beaten?", occupations = "Martial Artist", originalAppearance = "Dragon Ball", originalAppearanceYear = 1984))
-        characters.create(CharacterModel(name = "Doctor Octopus", description = "Mad scientist with 4 extra mechanical arms.", occupations = "Mad Scientist", originalAppearance = "The Amazing Spider Man #3", originalAppearanceYear = 1963))
-        characters.create(CharacterModel(name = "Solid Snake", description = "A smart and very sneaky elite operative.", occupations = "Special Forces Operative", originalAppearance = "Metal Gear", originalAppearanceYear = 1987))
-        characters.create(CharacterModel(name = "Alice", description = "Prone to falling down rabbitholes.", occupations = "Child", originalAppearance = "Alice's Adventures in Wonderland", originalAppearanceYear = 1865))
-        characters.create(CharacterModel(name = "Spike Spiegel", description = "A broke bounty hunter who is just trying to make ends meet.", occupations = "Bounty Hunter", originalAppearance = "Cowboy Bebop", originalAppearanceYear = 1998))
-        characters.create(CharacterModel(name = "Pintman", description = "45 pints, and I'll be at it again.", occupations = "Pintman", originalAppearance = "The Pub", originalAppearanceYear = 1960))
+    fun importCharsFromJSON()
+    {
+        charView.loadFromJSON(charDB)
+    }
+
+    fun exportCharsToJSON()
+    {
+        charView.exportToJSON(charDB)
+    }
+
+    fun wipeDatabase()
+    {
+        println("Are you SURE you want to wipe the Database?")
+        println("(You can back it up by exporting it to the JSON file)")
+        print("Enter \"YES\" to Confirm or anything else to cancel > ")
+
+        var input = readLine()!!
+
+        if(input.uppercase() == "YES")
+        {
+            try
+            {
+                charView.wipeDatabase(charDB)
+
+                logger.info("The Database has been wiped.")
+            }
+            catch(ex: SQLException)
+            {
+                logger.info("ERROR WITH WIPING: No changes have been made to the Database.")
+            }
+        }
+        else
+        {
+            logger.info("No changes have been made to the Database.")
+        }
+    }
+
+    fun wipeJSON()
+    {
+        println("Are you SURE you want to wipe the JSON file?")
+        print("Enter \"YES\" to Confirm or anything else to cancel > ")
+
+        var input = readLine()!!
+
+        if(input.uppercase() == "YES")
+        {
+            try
+            {
+                charView.wipeDatabase(charDB)
+
+                logger.info("The file has been wiped.")
+            }
+            catch(ex: SQLException)
+            {
+                logger.info("ERROR WITH WIPING: No changes have been made to the File.")
+            }
+        }
+        else
+        {
+            logger.info("No changes have been made to the File.")
+        }
     }
 }

@@ -1,8 +1,7 @@
 package org.assignments.characterdb.views
 
+import jdk.jfr.Description
 import org.assignments.characterdb.models.CharacterDBStore
-import org.assignments.characterdb.models.CharacterJSONStore
-import org.assignments.characterdb.models.CharacterMemStore
 import org.assignments.characterdb.models.CharacterModel
 
 class CharacterView {
@@ -19,6 +18,7 @@ class CharacterView {
         println("3: Delete a Character")
         println("4: List Characters")
         println("5: Search Characters")
+        println("6: Database Options")
         println("0: Exit")
         print("> ")
 
@@ -90,18 +90,72 @@ class CharacterView {
         return option
     }
 
-    fun listCharacters(characters: CharacterDBStore)
+    fun databaseMenu() : Int
+    {
+        var option: Int
+        var input: String?
+
+        println("------------------------------------")
+        println("Database Options Menu")
+        println("1: Export Database to JSON")
+        println("2: Import characters from JSON file")
+        println("3: Wipe Database (DELETE ALL)")
+        println("0: Exit Database Menu")
+        print("> ")
+
+        input = readLine()!!
+
+        option = if(input.toIntOrNull() != null && !input.isEmpty())
+        {
+            input.toInt()
+        }
+        else
+        {
+            -1
+        }
+
+        return option
+    }
+
+    fun listCharacters(charDB: CharacterDBStore)
     {
         println()
-        characters.logAll()
+        charDB.logAll()
         println()
     }
 
-    fun listCharactersAlphabetically(characters: CharacterDBStore)
+    fun listCharactersAlphabetically(charDB: CharacterDBStore)
     {
         println()
-        characters.getAllAlphabeticallyByName()
+        charDB.getAllAlphabeticallyByName()
         println()
+    }
+
+    fun listCharactersByYear(charDB: CharacterDBStore)
+    {
+        println()
+        charDB.getAllByFirstAppearanceDate()
+        println()
+    }
+
+    fun loadFromJSON(charDB: CharacterDBStore)
+    {
+        charDB.readFromJSON()
+    }
+
+    fun exportToJSON(charDB: CharacterDBStore)
+    {
+        charDB.writeToJSON()
+    }
+
+    fun wipeDatabase(charDB: CharacterDBStore)
+    {
+        charDB.wipeDatabase()
+    }
+
+    fun wipeJSON(charDB: CharacterDBStore)
+    {
+        charDB.wipeJSON()
     }
 
     fun showCharacter(character: CharacterModel)
@@ -133,23 +187,36 @@ class CharacterView {
 
     fun addCharacterData(character: CharacterModel): Boolean
     {
-        println()
-        print("Enter a Name: ")
-        character.name = readLine()!!
+        try
+        {
+            println()
+            print("Enter a Name: ")
+            character.name = readLine()!!
 
-        print("Enter a Description: ")
-        character.description = readLine()!!
+            print("Enter a Description: ")
+            character.description = readLine()!!
 
-        print("Enter an Occupation: ")
-        character.occupations = readLine()!!
+            print("Enter an Occupation: ")
+            character.occupations = readLine()!!
 
-        print("Enter Original Appearance: ")
-        character.originalAppearance = readLine()!!
+            print("Enter Original Appearance: ")
+            character.originalAppearance = readLine()!!
 
-        print("Enter Original Appearance Year: ")
-        character.originalAppearanceYear = readLine()!!.toInt()
+            print("Enter Original Appearance Year: ")
+            character.originalAppearanceYear = readLine()!!.toInt()
 
-        return character.name.isNotEmpty() //validate our input, add more secure checks
+            if(validateCharacter(character.name, character.description, character.occupations, character.originalAppearance, character.originalAppearanceYear!!))
+            {
+                return true;
+            }
+            println("Error with user Inputs")
+            return false;
+        }
+        catch(ex: Exception)
+        {
+            println("Error with user Inputs")
+            return false;
+        }
     }
 
     fun updateCharacterData(character: CharacterModel): Boolean
@@ -176,22 +243,27 @@ class CharacterView {
             tempOriginalAppearance = readLine()!!
 
             print("Enter a new Original Appearance Year for [" + character.originalAppearanceYear + "]: ")
-            tempOriginalAppearanceYear = readLine()!!.toInt()
+            try
+            {
+                tempOriginalAppearanceYear = readLine()!!.toInt()
+            }
+            catch(ex: Exception)
+            {
+                return false
+            }
 
-
-            if(!tempName.isNullOrEmpty()) //authenticate valid variables here, could write new method for it.
+            if(validateCharacter(tempName, tempDescription, tempOccupations, tempOriginalAppearance, tempOriginalAppearanceYear)) //authenticate valid variables here, could write new method for it.
             {
                 //update values and return true
-                character.name = tempName;
-                character.description = tempDescription;
-                character.occupations = tempOccupations;
-                character.originalAppearance = tempOriginalAppearance;
-                character.originalAppearanceYear = tempOriginalAppearanceYear;
+                character.name = tempName
+                character.description = tempDescription
+                character.occupations = tempOccupations
+                character.originalAppearance = tempOriginalAppearance
+                character.originalAppearanceYear = tempOriginalAppearanceYear
 
                 return true
             }
         }
-
         return false
     }
 
@@ -221,5 +293,42 @@ class CharacterView {
         name = readLine()!!
 
         return name
+    }
+
+    fun validateCharacter(name: String, description: String, occupation: String, originalAppearance: String, appearanceYear: Int): Boolean
+    {
+        if(checkValidString(name) && checkValidDescription(description) && checkValidString(occupation) && checkValidString(originalAppearance) && checkValidYear(appearanceYear))
+        {
+            return true
+        }
+        return false
+    }
+
+    fun checkValidString(string: String): Boolean
+    {
+        if(string.contains("\"") || string.isNullOrEmpty() || string.length > 100)
+        {
+            return false
+        }
+        return true
+    }
+
+    fun checkValidDescription(string: String): Boolean
+    {
+        if(string.contains("\"") || string.isNullOrEmpty())
+        {
+            return false
+        }
+        return true
+    }
+
+    fun checkValidYear(year: Int): Boolean
+    {
+        //allow between these years inclusive
+        if(year > 9999 || year < -9999)
+        {
+            return false
+        }
+        return true
     }
 }

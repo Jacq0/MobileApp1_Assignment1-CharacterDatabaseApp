@@ -1,8 +1,14 @@
 package org.assignments.characterdb.models
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import io.ktor.server.util.*
 import io.ktor.util.*
 import mu.KotlinLogging
+import org.assignments.characterdb.helpers.exists
+import org.assignments.characterdb.helpers.read
+import org.assignments.characterdb.helpers.write
 import java.sql.*
 import java.util.Date
 import java.time.LocalDateTime
@@ -20,6 +26,16 @@ private val logger = KotlinLogging.logger {}
 
 //These have to be null by default before initialised
 var conn : Connection? = null
+
+//data for the JSON read/write
+val JSON_FILE = "characters.json"
+val gsonBuilder = GsonBuilder().setPrettyPrinting().create()
+val listType = object : TypeToken<ArrayList<CharacterModel>>() {}.type
+
+fun generateRandomId(): Long
+{
+    return Random().nextLong()
+}
 
 @OptIn(InternalAPI::class)
 class CharacterDBStore: CharacterStore
@@ -74,9 +90,29 @@ class CharacterDBStore: CharacterStore
         return foundChar
     }
 
-    override fun getAllAlphabeticallyByName(): List<CharacterModel>
+    internal fun logAll()
     {
-       return characters.sortedBy { it.name }
+        characters.forEach{
+            println(toString(it))
+        }
+    }
+
+    override fun getAllAlphabeticallyByName()
+    {
+       var sortedChars = characters.sortedBy { it.name }
+
+        sortedChars.forEach {
+            println(toString(it))
+        }
+    }
+
+    override fun getAllByFirstAppearanceDate()
+    {
+        var sortedChars = characters.sortedBy { it.originalAppearanceYear }
+
+        sortedChars.forEach {
+            println(toString(it))
+        }
     }
 
     override fun getByName(n: String): MutableList<CharacterModel>?
@@ -106,8 +142,9 @@ class CharacterDBStore: CharacterStore
             //we don't need to add the last modified value here because its not applicable to an add. (If its null the character entry was never modified)
             var result = statement.executeUpdate("INSERT INTO " + dbCharacterTable + " " +
                     "(ID, NAME, DESCRIPTION, OCCUPATION, ORIGINAL_APPEARANCE, APPEARANCE_YEAR, ADDED) VALUES " +
-                    "(\'" + character.id + "\', \'" + character.name + "\',\'" + character.description + "\', \'" + character.occupations + "\', \'" +
-                    character.originalAppearance + "\', \'" + character.originalAppearanceYear + "\', \'" + character.dateTimeAdded + "\')")
+                    "(\'" + character.id + "\', \'" + character.name.replace("\'","\'\'") + "\',\'"
+                    + character.description.replace("\'","\'\'") + "\', \'" + character.occupations.replace("\'","\'\'") + "\', \'"
+                    + character.originalAppearance.replace("\'","\'\'") + "\', \'" + character.originalAppearanceYear + "\', \'" + character.dateTimeAdded + "\')")
 
             characters.add(character) //add to character list last
         }
@@ -122,8 +159,6 @@ class CharacterDBStore: CharacterStore
         var foundChar = getOne(character.id!!)
         if (foundChar != null)
         {
-            logger.debug { character }
-            logger.debug { foundChar }
             try
             {
                 foundChar.name = character.name
@@ -135,9 +170,9 @@ class CharacterDBStore: CharacterStore
 
                 var statement= conn!!.createStatement();
 
-                var result = statement.executeUpdate("UPDATE " + dbCharacterTable + " SET NAME = \'" + foundChar?.name
-                        + "\', DESCRIPTION = \'" + foundChar?.description + "\'," + "OCCUPATION = \'" + foundChar?.occupations + "\',"
-                        + "ORIGINAl_APPEARANCE = \'" + foundChar?.originalAppearance + "\'," + "APPEARANCE_YEAR = \'"
+                var result = statement.executeUpdate("UPDATE " + dbCharacterTable + " SET NAME = \'" + foundChar?.name?.replace("\'","\'\'")
+                        + "\', DESCRIPTION = \'" + foundChar?.description?.replace("\'","\'\'") + "\'," + "OCCUPATION = \'" + foundChar?.occupations?.replace("\'","\'\'") + "\',"
+                        + "ORIGINAl_APPEARANCE = \'" + foundChar?.originalAppearance?.replace("\'","\'\'") + "\'," + "APPEARANCE_YEAR = \'"
                         + foundChar?.originalAppearanceYear + "\'," + "LAST_MODIFIED = \'" + foundChar?.lastModified + "\' WHERE ID = \'" + foundChar?.id + "\'")
             }
             catch(ex: SQLException)
@@ -169,9 +204,66 @@ class CharacterDBStore: CharacterStore
         }
     }
 
-    internal fun logAll()
+    //Import and export from JSON, these are only run when the user wants them to be
+    override fun writeToJSON()
     {
-        characters.forEach { logger.info("${it}") }
+        val jsonString = gsonBuilder.toJson(characters, listType)
+        write(JSON_FILE, jsonString)
+    }
+
+    override fun readFromJSON()
+    {
+        try
+        {
+            val jsonString = read(JSON_FILE)
+
+            var inChars : MutableList<CharacterModel> = Gson().fromJson(jsonString, listType)
+
+            for (char in inChars)
+            {
+                create(char) //create this char in the database
+            }
+        }
+        catch(ex: Exception)
+        {
+            logger.error { ex.toString() }
+        }
+    }
+
+    override fun wipeDatabase()
+    {
+        //try wipe the data from the table
+        try
+        {
+            var statement= conn!!.createStatement();
+
+            //we don't need to add the last modified value here because its not applicable to an add. (If its null the character entry was never modified)
+            var result = statement.executeUpdate("DELETE FROM " + dbCharacterTable);
+
+            characters = mutableListOf<CharacterModel>() //set the characters to a new list
+        }
+        catch(ex: SQLException)
+        {
+            logger.error { ex.toString() }
+        }
+    }
+
+    //wipe the json file
+    override fun wipeJSON()
+    {
+        try
+        {
+            val chars = mutableListOf<CharacterModel>()
+
+            val jsonString = gsonBuilder.toJson(chars, listType)
+            write(JSON_FILE, jsonString)
+
+            characters = chars
+        }
+        catch(ex: Exception)
+        {
+            logger.error { ex.toString() }
+        }
     }
 
     private fun connectWithDatabase() : Connection
@@ -184,7 +276,7 @@ class CharacterDBStore: CharacterStore
         return DriverManager.getConnection("jdbc:mysql://" + dbUri + ":" + dbPort + "/" + dbName, properties)
     }
 
-    @OptIn(InternalAPI::class)
+    @OptIn(InternalAPI::class) //this is necessary for part of the method to work, no idea why
     private fun convertToDateTime(inDate: Date?): LocalDateTime?
     {
         if(inDate != null)
@@ -196,5 +288,30 @@ class CharacterDBStore: CharacterStore
             return localDateTime
         }
         return null;
+    }
+
+    //methods for printing the character to string in a nice way.
+    private fun toString(char: CharacterModel): String
+    {
+        val string = "---------------\n" +
+            "ID: " + char.id + "\n" + "Name: " + char.name + "\n" +
+                "Original Appearance: " + char.originalAppearance + " (" + char.originalAppearanceYear + ")"
+
+        return string
+    }
+
+    public fun toStringVerbose(char: CharacterModel): String
+    {
+        val string = "---------------\n" +
+                "ID: " + char.id + "\n" +
+                "Name: " + char.name + "\n" +
+                "Occupation: " +  char.occupations + "\n" +
+                "Original Appearance: " + char.originalAppearance + " (" + char.originalAppearanceYear + ")\n" +
+                "\n---Description--- \n" + char.description + "\n" +
+
+                "Added: " + char.dateTimeAdded + "\n" +
+                "Last Modified: " + char.lastModified
+
+        return string
     }
 }
